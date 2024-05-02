@@ -12,4 +12,4 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.0 // indirect
 )
 
-go 1.22.1
+go 1.22
