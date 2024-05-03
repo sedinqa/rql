@@ -476,7 +476,7 @@ func (p *Parser) fmtOp(field string, op Op) string {
 	switch op{
 	case CONTAINS:
 		colName := p.colName(field)
-		return "JSON_CONTAINS("+colName+",'?','$')"
+		return "JSON_CONTAINS("+colName+",?,'$')"
 	default:
 		colName := p.colName(field)
 		return colName + " " + op.SQL() + " ?"
