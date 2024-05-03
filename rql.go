@@ -336,7 +336,12 @@ func (p *Parser) parseField(sf reflect.StructField) error {
 			filterOps = append(filterOps, EQ, NEQ, LT, LTE, GT, GTE)
 		}
 	default:
-		return fmt.Errorf("rql: field type for %q is not supported", sf.Name)
+		if typ.Name()=="JSONSlice[string]"{
+			f.ValidateFn = validateString
+			filterOps = append(filterOps, CONTAINS)
+		} else {
+			return fmt.Errorf("rql: field type for %q is not supported", sf.Name)
+		}
 	}
 	for _, op := range filterOps {
 		f.FilterOps[p.op(op)] = true
@@ -468,8 +473,15 @@ func (p *parseState) field(f *field, v interface{}) {
 // fmtOp create a string for the operation with a placeholder.
 // for example: "name = ?", or "age >= ?".
 func (p *Parser) fmtOp(field string, op Op) string {
-	colName := p.colName(field)
-	return colName + " " + op.SQL() + " ?"
+	switch op{
+	case CONTAINS:
+		colName := p.colName(field)
+		return "JSON_CONTAINS("+colName+",'?','$')"
+	default:
+		colName := p.colName(field)
+		return colName + " " + op.SQL() + " ?"
+	}
+	
 }
 
 // colName formats the query field to database column name in cases the user configured a custom

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -10,8 +11,9 @@ import (
 	"time"
 
 	"github.com/sedinqa/rql"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"gorm.io/datatypes"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var (
@@ -27,22 +29,22 @@ var (
 
 // User is the model in gorm's terminology.
 type User struct {
-	ID          uint      `gorm:"primary_key" rql:"filter,sort"`
-	ManagerId	*uint
-	Manager		*User	  
-	DirectReports	[]User	`gorm:"foreignKey:ManagerId"`		
-	Admin       bool      `rql:"filter"`
-	Name        string    `rql:"filter"`
-	AddressName string    `rql:"filter"`
-	CreatedAt   time.Time `rql:"filter,sort"`
+	ID          	uint      						`gorm:"primary_key" rql:"filter,sort"`
+	ManagerId		*uint
+	Manager			*User	  
+	DirectReports	[]User							`gorm:"foreignKey:ManagerId"`		
+	Admin       	bool      						`rql:"filter"`
+	Name        	string    						`rql:"filter"`
+	Tags        	datatypes.JSONSlice[string]    	`rql:"filter"`
+	AddressName 	string    `rql:"filter"`
+	CreatedAt   	time.Time `rql:"filter,sort"`
 }
 
 func main() {
 	var err error
-	db, err = gorm.Open("sqlite3", "test.db")
+	db, err = gorm.Open(sqlite.Open("test.db") )
 	must(err, "initialize db")
-	defer db.Close()
-	must(db.AutoMigrate(User{}).Error, "run migration")
+	must(db.AutoMigrate(User{}), "run migration")
 	u1:=&User{Name: "Atmaram Naik"}
 	must(db.Create(u1).Error, "create test user")
 	u2:=&User{Name: "Bharathi",ManagerId: &u1.ID}
@@ -62,7 +64,9 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	err = db.Where(p.FilterExp, p.FilterArgs).
+	fmt.Println(p.FilterExp)
+	
+	err = db.Where(p.FilterExp, p.FilterArgs...).
 		Offset(p.Offset).
 		Limit(p.Limit).
 		Order(p.Sort).

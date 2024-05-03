@@ -16,15 +16,16 @@ func (o Op) SQL() string {
 
 // Operators that support by rql.
 const (
-	EQ   = Op("eq")   // =
-	NEQ  = Op("neq")  // <>
-	LT   = Op("lt")   // <
-	GT   = Op("gt")   // >
-	LTE  = Op("lte")  // <=
-	GTE  = Op("gte")  // >=
-	LIKE = Op("like") // LIKE "PATTERN"
-	OR   = Op("or")   // disjunction
-	AND  = Op("and")  // conjunction
+	EQ   		= Op("eq")   		// =
+	NEQ  		= Op("neq")  		// <>
+	LT   		= Op("lt")   		// <
+	GT   		= Op("gt")   		// >
+	LTE  		= Op("lte")  		// <=
+	GTE  		= Op("gte")  		// >=
+	LIKE 		= Op("like") 		// LIKE "PATTERN"
+	OR   		= Op("or")   		// disjunction
+	AND  		= Op("and")  		// conjunction
+	CONTAINS  	= Op("contains")  	// json contains
 )
 
 // Default values for configuration.
