@@ -231,15 +231,15 @@ func (p *Parser) init() error {
 	}
 	for l.Len() > 0 {
 		f := l.Remove(l.Front()).(reflect.StructField)
-		_, ok := f.Tag.Lookup(p.TagName)
+		tag, ok := f.Tag.Lookup(p.TagName)
 		switch t := indirect(f.Type); {
 		// no matter what the type of this field. if it has a tag,
 		// it is probably a filterable or sortable.
-		case ok:
+		case ok && !strings.Contains(tag, "nested"):
 			if err := p.parseField(f); err != nil {
 				return err
 			}
-		case t.Kind() == reflect.Struct:
+		case ok && t.Kind() == reflect.Struct && strings.Contains(tag, "nested"):
 			for i := 0; i < t.NumField(); i++ {
 				f1 := t.Field(i)
 				if !f.Anonymous {

@@ -28,6 +28,9 @@ var (
 // User is the model in gorm's terminology.
 type User struct {
 	ID          uint      `gorm:"primary_key" rql:"filter,sort"`
+	ManagerId	*uint
+	Manager		*User	  
+	DirectReports	[]User	`gorm:"foreignKey:ManagerId"`		
 	Admin       bool      `rql:"filter"`
 	Name        string    `rql:"filter"`
 	AddressName string    `rql:"filter"`
@@ -40,7 +43,10 @@ func main() {
 	must(err, "initialize db")
 	defer db.Close()
 	must(db.AutoMigrate(User{}).Error, "run migration")
-	must(db.Create(&User{Name: "test"}).Error, "create test user")
+	u1:=&User{Name: "Atmaram Naik"}
+	must(db.Create(u1).Error, "create test user")
+	u2:=&User{Name: "Bharathi",ManagerId: &u1.ID}
+	must(db.Create(u2).Error, "create test user")
 	http.HandleFunc("/users", GetUsers)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 	// Now, go to your terminal and run the folllowing commad in order to test the application:
