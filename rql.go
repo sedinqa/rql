@@ -338,6 +338,7 @@ func (p *Parser) parseField(sf reflect.StructField) error {
 	default:
 		if typ.Name()=="JSONSlice[string]"{
 			f.ValidateFn = validateString
+			f.CovertFn = convertJsonString()
 			filterOps = append(filterOps, CONTAINS)
 		} else {
 			return fmt.Errorf("rql: field type for %q is not supported", sf.Name)
@@ -600,6 +601,11 @@ func convertTime(layout string) func(interface{}) interface{} {
 	return func(v interface{}) interface{} {
 		t, _ := time.Parse(layout, v.(string))
 		return t
+	}
+}
+func convertJsonString() func(interface{}) interface{} {
+	return func(v interface{}) interface{} {
+		return "\""+ v.(string)+"\""
 	}
 }
 
